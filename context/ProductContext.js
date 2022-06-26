@@ -1,16 +1,16 @@
-import React, { createContext, useReducer, useContext } from "react";
+import React, { createContext, useReducer, useContext, useEffect } from "react";
 import ProductReducer from "./ProductReducer";
-import { productData } from "../data";
+// import { productData } from "../data";
+import axios from "axios";
 
 const ProductContext = createContext();
 
 const initialState = {
-  products: productData,
-  sales: [],
+  products: [],
+  cart: [],
   orders: [],
   totalAmount: 0,
   totalQuantity: 0,
-  popular: [],
 };
 
 const ProductContextProvider = ({ children }) => {

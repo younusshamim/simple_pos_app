@@ -2,43 +2,52 @@
 import React, { useEffect } from "react";
 import { Container, Table } from "react-bootstrap";
 import { useProductContext } from "../context/ProductContext";
+import axios from "axios";
+import { useAuthContext } from "../context/AuthContext";
+import { useRouter } from "next/router";
 
-const reports = () => {
-  const { dispatch, popular } = useProductContext();
+const reports = ({ ordersList }) => {
+  const { dispatch, orders } = useProductContext();
+  const { userActive } = useAuthContext();
+  const router = useRouter();
 
   useEffect(() => {
-    dispatch({ type: "GET_POPULAR" });
-  }, [dispatch]);
+    !userActive && router.push("/login");
+  }, []);
 
-  if (popular.length === 0) {
-    return (
-      <Container className="py-3">
-        <h4 className="text-center text-secondary mt-5">Not found</h4>
-      </Container>
-    );
-  }
+  useEffect(() => {
+    dispatch({ type: "GET_ORDERS", payload: ordersList });
+  }, [dispatch, ordersList]);
+
+  console.log(orders);
 
   return (
-    <Container className="py-3">
-      <h2 className="text-bold">Popular Items</h2>
+    <>
+      {userActive && (
+        <Container className="py-3">
+          <h2 className="text-bold">Popular Items</h2>
 
-      <Table striped className="text-center">
-        <tbody>
-          <tr>
-            <th>Name</th>
-            <th>Price</th>
-          </tr>
-
-          {popular.map((product) => (
-            <tr key={product.id}>
-              <td>{product.name}</td>
-              <td>{`${product.price}/-`}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    </Container>
+          <Table striped className="text-center">
+            <tbody>
+              <tr>
+                <th>Name</th>
+                <th>Price</th>
+              </tr>
+            </tbody>
+          </Table>
+        </Container>
+      )}
+    </>
   );
 };
 
 export default reports;
+
+export const getServerSideProps = async (ctx) => {
+  const response = await axios.get("http://localhost:3000/api/orders");
+  return {
+    props: {
+      ordersList: response.data,
+    },
+  };
+};
